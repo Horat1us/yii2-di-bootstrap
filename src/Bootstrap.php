@@ -11,10 +11,13 @@ use yii\di;
  * Class Bootstrap
  * @package Horat1us\Yii\DI
  */
-abstract class Bootstrap extends base\BaseObject implements base\BootstrapInterface
+class Bootstrap extends base\BaseObject implements base\BootstrapInterface
 {
     /** @var string[]|array[]|callable references */
     public $definitions = [];
+
+    /** @var string[]|array[]|callable singleton references */
+    public $singletons = [];
 
     /**
      * @throws base\InvalidConfigException
@@ -22,14 +25,7 @@ abstract class Bootstrap extends base\BaseObject implements base\BootstrapInterf
     public function init(): void
     {
         parent::init();
-
-        $invalidDependencies = array_diff_key($this->definitions, $this->getDefinitions());
-        if ($invalidDependencies) {
-            throw new base\InvalidConfigException(
-                "Definitions " . implode(", ", array_keys($invalidDependencies))
-                . " is not supported by " . static::class
-            );
-        }
+        $this->validateDefinitionsConfiguration($this->definitions, $this->getDefinitions());
     }
 
     public function bootstrap($app, di\Container $container = null): void
@@ -43,5 +39,27 @@ abstract class Bootstrap extends base\BaseObject implements base\BootstrapInterf
         $container->setDefinitions($definitions);
     }
 
-    abstract public function getDefinitions(): array;
+    public function getDefinitions(): array
+    {
+        return [];
+    }
+
+    public function getSingletons(): array
+    {
+        return [];
+    }
+
+    /**
+     * @throws base\InvalidConfigException
+     */
+    protected function validateDefinitionsConfiguration(array $configured, array $example): void
+    {
+        $invalidDependencies = array_diff_key($configured, $example);
+        if ($invalidDependencies) {
+            throw new base\InvalidConfigException(
+                "Definitions " . implode(", ", array_keys($invalidDependencies))
+                . " is not supported by " . static::class
+            );
+        }
+    }
 }
