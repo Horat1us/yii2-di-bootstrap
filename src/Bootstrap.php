@@ -26,6 +26,7 @@ class Bootstrap extends base\BaseObject implements base\BootstrapInterface
     {
         parent::init();
         $this->validateDefinitionsConfiguration($this->definitions, $this->getDefinitions());
+        $this->validateDefinitionsConfiguration($this->singletons, $this->getSingletons());
     }
 
     public function bootstrap($app, di\Container $container = null): void
@@ -37,6 +38,8 @@ class Bootstrap extends base\BaseObject implements base\BootstrapInterface
     {
         $definitions = array_merge($this->getDefinitions(), $this->definitions);
         $container->setDefinitions($definitions);
+        $singletons = array_merge($this->getSingletons(), $this->singletons);
+        $container->setSingletons($singletons);
     }
 
     public function getDefinitions(): array
