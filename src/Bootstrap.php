@@ -1,27 +1,18 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace Horat1us\Yii\DI;
 
 use yii\base;
 use yii\di;
 
-/**
- * Class Bootstrap
- * @package Horat1us\Yii\DI
- */
 class Bootstrap extends base\BaseObject implements base\BootstrapInterface
 {
-    /** @var string[]|array[]|callable references */
-    public $definitions = [];
+    /** @var string[]|array[]|callable[] references */
+    public array $definitions = [];
 
-    /** @var string[]|array[]|callable singleton references */
-    public $singletons = [];
+    /** @var string[]|array[]|callable[] singleton references */
+    public array $singletons = [];
 
-    /**
-     * @throws base\InvalidConfigException
-     */
     public function init(): void
     {
         parent::init();
@@ -31,15 +22,11 @@ class Bootstrap extends base\BaseObject implements base\BootstrapInterface
 
     public function bootstrap($app, di\Container $container = null): void
     {
-        $this->configure($container ?? \Yii::$container);
-    }
-
-    public function configure(di\Container $container): void
-    {
-        $definitions = array_merge($this->getDefinitions(), $this->definitions);
-        $container->setDefinitions($definitions);
-        $singletons = array_merge($this->getSingletons(), $this->singletons);
-        $container->setSingletons($singletons);
+        $config = [
+            'definitions' => array_merge($this->getDefinitions(), $this->definitions),
+            'singletons' => array_merge($this->getSingletons(), $this->singletons),
+        ];
+        $app->setContainer($config);
     }
 
     public function getDefinitions(): array
@@ -52,9 +39,6 @@ class Bootstrap extends base\BaseObject implements base\BootstrapInterface
         return [];
     }
 
-    /**
-     * @throws base\InvalidConfigException
-     */
     protected function validateDefinitionsConfiguration(array $configured, array $example): void
     {
         $invalidDependencies = array_diff_key($configured, $example);

@@ -6,97 +6,54 @@ namespace Horat1us\Yii\DI\Tests;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Horat1us\Yii\DI;
+use Horat1us\Yii\DI\Bootstrap;
+use yii\console;
 use yii\base;
+use yii\di;
 
-/**
- * Class BootstrapTest
- * @package Horat1us\Yii\DI\Tests
- */
 class BootstrapTest extends TestCase
 {
+    private Bootstrap $bootstrap;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->bootstrap = $this->createPartialMock(Bootstrap::class, ['getDefinitions']);
+    }
+
     public function testInvalidDependency(): void
     {
-        /** @var DI\Bootstrap|MockObject $bootstrap */
-        /** @noinspection PhpUnhandledExceptionInspection */
-        $bootstrap = $this->getMockBuilder(DI\Bootstrap::class)
-            ->setMethods(['getDefinitions'])
-            ->disableOriginalConstructor()
-            ->setMockClassName('BootstrapMock')
-            ->getMockForAbstractClass();
-
-        $bootstrap
+        $this->bootstrap
             ->expects($this->once())
             ->method('getDefinitions')
             ->willReturn([]);
-
-        $bootstrap->definitions = [
+        $this->bootstrap->definitions = [
             'invalidDependencyClass' => '',
         ];
 
         $this->expectException(base\InvalidConfigException::class);
-        $this->expectExceptionMessage("Definitions invalidDependencyClass is not supported by BootstrapMock");
+        $this->expectExceptionMessage(
+            "Definitions invalidDependencyClass is not supported by " . get_class($this->bootstrap)
+        );
 
-        /** @noinspection PhpUnhandledExceptionInspection */
-        $bootstrap->init();
+        $this->bootstrap->init();
     }
 
     public function testBootstrap(): void
     {
-        /** @noinspection PhpUnhandledExceptionInspection */
-        $container = $this->createMock(\yii\di\Container::class);
-        /** @noinspection PhpUnhandledExceptionInspection */
-        /** @var \yii\di\Container $container */
-        $app = $this->getMockBuilder(base\Application::class)
-            ->disableOriginalConstructor()
-            ->getMockForAbstractClass();
-
-        /** @var DI\Bootstrap|MockObject $bootstrap */
-        /** @noinspection PhpUnhandledExceptionInspection */
-        $bootstrap = $this->getMockBuilder(DI\Bootstrap::class)
-            ->setMethods(['configure'])
-            ->disableOriginalConstructor()
-            ->getMockForAbstractClass();
-
-        $bootstrap
-            ->expects($this->once())
-            ->method('configure')
-            ->with($container);
-
-        /** @noinspection PhpUnhandledExceptionInspection */
-        $bootstrap->init();
-        $bootstrap->bootstrap($app, $container);
-    }
-
-    public function testConfigure(): void
-    {
-
-        /** @var DI\Bootstrap|MockObject $bootstrap */
-        /** @noinspection PhpUnhandledExceptionInspection */
-        $bootstrap = $this->getMockBuilder(DI\Bootstrap::class)
-            ->setMethods(['getDefinitions'])
-            ->disableOriginalConstructor()
-            ->getMockForAbstractClass();
-
-        $bootstrap
+        $this->bootstrap
             ->expects($this->once())
             ->method('getDefinitions')
             ->willReturn($default = ['a' => 'default', 'b' => 'default']);
+        $this->bootstrap->definitions = ['a' => 'overriden', 'd' => 'added',];
 
-        $bootstrap->definitions = ['a' => 'overriden', 'd' => 'added',];
+        $app = $this->createMock(console\Application::class);
+        $app->expects($this->once())->method('setContainer')->with(['definitions' => [
+            'a' => 'overriden',
+            'b' => 'default',
+            'd' => 'added',
+        ], 'singletons' => [],]);
 
-        /** @noinspection PhpUnhandledExceptionInspection */
-        /** @var \yii\di\Container|MockObject $container */
-        $container = $this->createMock(\yii\di\Container::class);
-        $container
-            ->expects($this->once())
-            ->method('setDefinitions')
-            ->with([
-                'a' => 'overriden',
-                'b' => 'default',
-                'd' => 'added',
-            ]);
-
-        $bootstrap->configure($container);
+        $this->bootstrap->bootstrap($app);
     }
 }

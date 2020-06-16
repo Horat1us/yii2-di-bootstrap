@@ -10,7 +10,7 @@ Main purpose of this package to prevent invalid container configuration.
 ## Installation
 Using [packagist.org](https://packagist.org/packages/horat1us/yii2-di-bootstrap):
 ```bash
-composer require horat1us/yii2-di-bootstrap:^1.0
+composer require horat1us/yii2-di-bootstrap:^1.1
 ```
 
 ## Usage
