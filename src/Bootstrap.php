@@ -20,7 +20,7 @@ class Bootstrap extends base\BaseObject implements base\BootstrapInterface
         $this->validateDefinitionsConfiguration($this->singletons, $this->getSingletons());
     }
 
-    public function bootstrap($app, di\Container $container = null): void
+    public function bootstrap($app, ?di\Container $container = null): void
     {
         $config = [
             'definitions' => array_merge($this->getDefinitions(), $this->definitions),
