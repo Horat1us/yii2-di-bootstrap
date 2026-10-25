@@ -22,11 +22,15 @@ class Bootstrap extends base\BaseObject implements base\BootstrapInterface
 
     public function bootstrap($app, ?di\Container $container = null): void
     {
-        $config = [
-            'definitions' => array_merge($this->getDefinitions(), $this->definitions),
-            'singletons' => array_merge($this->getSingletons(), $this->singletons),
-        ];
-        $app->setContainer($config);
+        $this->configure($container ?? \Yii::$container);
+    }
+
+    public function configure(di\Container $container): void
+    {
+        $definitions = array_merge($this->getDefinitions(), $this->definitions);
+        $container->setDefinitions($definitions);
+        $singletons = array_merge($this->getSingletons(), $this->singletons);
+        $container->setSingletons($singletons);
     }
 
     public function getDefinitions(): array
